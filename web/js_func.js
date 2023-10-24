@@ -70,3 +70,17 @@ function createList() {
     const permissionStatus = await navigator.permissions.query({ name: 'microphone' });
     return permissionStatus.state;
   }
+
+  ///todo 対象ブラウザかどうかの判定
+  function isSupportedBrowser() {
+  try {
+   recognition.start();
+      recognition.stop();
+      console.error("エラーなし: ");
+        return true;
+  } catch (e) {
+    // エラーが発生した場合の処理を行います
+    console.error("エラーが発生しました: " + e.message);
+    return false;
+  }
+  }

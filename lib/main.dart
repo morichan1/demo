@@ -58,11 +58,18 @@ class _MyHomePageState extends State<MyHomePage> {
 //1秒ごとに一回jsの関数を動かしている
    late Timer timerd;
   var textController;
+  bool isSupported=false;
 
-  void _incrementCounter() {
+@override
+  void initState() {
+    // TODO: implement initState
+  Future(() async {
+    await Future.delayed(Duration(milliseconds: 50));
     setState(() {
-      _counter++;
+      isSupported = isSupportedBrowser();
     });
+  });
+    super.initState();
   }
 
   @override
@@ -76,6 +83,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Text(
+              (isSupported)?
+              'このブラウザは対象のブラウザです':'このブラウザは非対象です',
+            ),
+
+            ElevatedButton(onPressed: (){
+              isSupportedBrowser();
+            }, child: Text('判断')),
             const Text(
               'You have pushed the button this many times:',
             ),
