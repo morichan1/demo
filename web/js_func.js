@@ -74,7 +74,7 @@ function createList() {
   ///todo 対象ブラウザかどうかの判定
   function isSupportedBrowser() {
 SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
-if ('SpeechRecognition' in window) {
+if (SpeechRecognition in window) {
   // ユーザのブラウザは音声合成に対応しています。
   return true;
 } else {
