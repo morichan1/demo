@@ -20,7 +20,7 @@ external List createList();
 external void endRecoding();
 
 @JS('checkMicrophonePermission')
-external Future checkMicrophonePermission();
+external String checkMicrophonePermission();
 
 @JS('isSupportedBrowser')
 external bool isSupportedBrowser();

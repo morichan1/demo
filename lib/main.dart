@@ -8,7 +8,7 @@ void main() {
   runApp(const MyApp());
 }
 
-
+var aa='aa';
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -59,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
    late Timer timerd;
   var textController;
   bool isSupported=false;
-  var aa='aa';
+
 
 @override
   void initState() {
@@ -71,6 +71,39 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   });
     super.initState();
+    final aa=isSupportedBrowser()??true;
+    print('isSupportedBrowser'+aa.toString());
+
+  if (aa){
+    WidgetsBinding.instance.addPostFrameCallback(
+            (_) => showDialog(context: context, builder:
+            (_) {
+          return AlertDialog(
+            content: Container(
+              height: 350,
+              width: 200,
+              child: Column(
+                children: [
+                  Text('お使いのブラウザでは正常な動作をしない場合がございます。\n'
+                      '以下主要ブラウザをご利用ください\n'
+                      'Chrome\n'
+                      'Safari\n'
+                      'Edge\n'
+                      'Opera 等\n'
+                      '※ブラウザのバージョンが古い場合も正常に動作しない場合がございます。\n'
+                      '※LINE上のブラウザでは正常に動作しません。'
+                  ),
+
+
+                ],
+              ),
+            ),
+
+          );
+        }
+        )
+    );
+  }
   }
 
   @override
@@ -92,6 +125,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(onPressed: (){
               setState(() {
                 isSupported = isSupportedBrowser();
+                aa=checkMicrophonePermission();
               });
 
             }, child: Text(aa)),
