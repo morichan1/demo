@@ -72,14 +72,20 @@ function createList() {
   }
 
   ///todo 対象ブラウザかどうかの判定
+  const browsersToCheck = ['Chrome', 'Safari', 'Edge', 'Opera'];
   function isSupportedBrowser() {
-SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
-if (SpeechRecognition in window) {
-  // ユーザのブラウザは音声合成に対応しています。
-  return true;
-} else {
-  // ユーザのブラウザは音声合成に対応していません。
-return false;
+// ブラウザのユーザーエージェント文字列を取得
+    const userAgent = navigator.userAgent.toLowerCase();
+
+    // 指定されたブラウザ名の配列をループで処理し、一致するものがあればtrueを返す
+    for (const browserName of browsersToCheck) {
+      if (userAgent.includes(browserName.toLowerCase())) {
+        return true;
+      }
+    }
+
+    // 一致するブラウザがなかった場合はfalseを返す
+    return false;
 }
 
   }

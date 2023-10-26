@@ -91,8 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
             ElevatedButton(onPressed: (){
               setState(() {
-                 aa=checkMicrophonePermission().toString();
-                print(aa);
+                isSupported = isSupportedBrowser();
               });
 
             }, child: Text(aa)),
