@@ -59,6 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
    late Timer timerd;
   var textController;
   bool isSupported=false;
+  var aa='aa';
 
 @override
   void initState() {
@@ -89,10 +90,17 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
 
             ElevatedButton(onPressed: (){
-              isSupportedBrowser();
-            }, child: Text('判断')),
-            const Text(
-              'You have pushed the button this many times:',
+              setState(() {
+                 aa=checkMicrophonePermission().toString();
+                print(aa);
+              });
+
+            }, child: Text(aa)),
+             Text(
+              aa,
+            ),
+            Text(
+              aa.toString(),
             ),
             Text(
               result.toString(),
