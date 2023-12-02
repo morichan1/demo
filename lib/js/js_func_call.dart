@@ -19,8 +19,9 @@ external List createList();
 @JS('endRecoding')
 external void endRecoding();
 
-@JS('checkMicrophonePermission')
-external String checkMicrophonePermission();
+@JS('isAnyBrowser')
+external bool isAnyBrowser();
 
-@JS('isSupportedBrowser')
-external bool isSupportedBrowser();
+
+@JS('startRecording')
+external Future<dynamic> startRecording();

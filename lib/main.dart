@@ -1,167 +1,290 @@
-import 'dart:async';
+import 'dart:ui';
 
+import 'package:audioplayers/audioplayers.dart';
+import 'package:demo/university_list/university_list.dart';
 import 'package:flutter/material.dart';
-
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:html' as html;
+import 'dart:typed_data';
+import 'dart:async';
+import 'highschool_list/list.dart';
 import 'js/js_func_call.dart';
-
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
-var aa='aa';
-class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-
-class _MyAppState extends State<MyApp> {
-
-
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home:  MyHomePage(title: 'おおおおお'),
+      home: MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-   MyHomePage({Key? key, required this.title}) : super(key: key);
-
-
-  final String title;
-
   @override
   State<MyHomePage> createState() => _MyHomePageState();
-
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  List result = ["", ""];
-//1秒ごとに一回jsの関数を動かしている
-   late Timer timerd;
-  var textController;
-  bool isSupported=false;
+  String textToAnalyze = "今日はとても楽しい日です。";
 
+  final audioPlayer = AudioPlayer();
 
-@override
-  void initState() {
-    // TODO: implement initState
-  Future(() async {
-    await Future.delayed(Duration(milliseconds: 50));
-    setState(() {
-      isSupported = isSupportedBrowser();
-    });
-  });
-    super.initState();
-    final aa=isSupportedBrowser()??true;
-    print('isSupportedBrowser'+aa.toString());
-
-  if (aa){
-    WidgetsBinding.instance.addPostFrameCallback(
-            (_) => showDialog(context: context, builder:
-            (_) {
-          return AlertDialog(
-            content: Container(
-              height: 350,
-              width: 200,
-              child: Column(
-                children: [
-                  Text('お使いのブラウザでは正常な動作をしない場合がございます。\n'
-                      '以下主要ブラウザをご利用ください\n'
-                      'Chrome\n'
-                      'Safari\n'
-                      'Edge\n'
-                      'Opera 等\n'
-                      '※ブラウザのバージョンが古い場合も正常に動作しない場合がございます。\n'
-                      '※LINE上のブラウザでは正常に動作しません。'
-                  ),
-
-
-                ],
-              ),
-            ),
-
-          );
-        }
-        )
-    );
-  }
-  }
-
+  TextEditingController highSchoolController = TextEditingController();
+  TextEditingController areaController = TextEditingController();
+  TextEditingController universityController = TextEditingController();
+//検索結果
+  List searchResultHighSchools = [];
+  List searchResultUniversities = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text('Flutter Demo'),
       ),
-      body: Center(
-        child: Column(
+      body: Column(
+        children: [
+          TextFormField(
+            decoration: InputDecoration(
+              labelText: '高校名',
+            ),
+            controller: highSchoolController,
+            onChanged: (text) {
+              List resultHighSchoolKana =
+              highschool_kana_list
+                  .where((univ) =>
+                  univ.contains(text))
+                  .toList();
+              //ひらがなのリストが手に入る
 
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              (isSupported)?
-              'このブラウザは対象のブラウザです':'このブラウザは非対象です',
-            ),
+              List resultHighSchoolKanji =
+              highschool_kanji_list
+                  .where((univ) =>
+                  univ.contains(text))
+                  .toList();
+              //漢字のリストが手に入る
 
-            ElevatedButton(onPressed: (){
-              setState(() {
-                isSupported = isSupportedBrowser();
-                aa=checkMicrophonePermission();
-              });
+              //ひらがな対応
+              if (resultHighSchoolKana
+                  .isNotEmpty) {
+                List resultIndex = [];
+                for (var i
+                in resultHighSchoolKana) {
+                  resultIndex.add(
+                      highschool_kana_list
+                          .indexOf(i));
+                }
+                List result = [];
+                for (var i in resultIndex) {
+                  result.add(highschool_kanji_list[i]);
+                }
+                if (result.isNotEmpty) {
+                  setState(() {
+                    searchResultHighSchools =
+                        result;
+                  });
+                }
+              }
+              //漢字対応
+              else if (resultHighSchoolKanji
+                  .isNotEmpty) {
+                List result = [];
+                for (var i
+                in resultHighSchoolKanji) {
+                  result.add(i);
+                }
+                if (result.isNotEmpty) {
+                  setState(() {
+                    searchResultHighSchools =
+                        result;
+                  });
+                }
+              }
+              print(searchResultHighSchools);
+            },
+          ),
+          SizedBox(height: 8),
+          (searchResultHighSchools.isNotEmpty)
+              ? Container(
+            color: Colors.grey.shade200,
+            height: 200,
+            child: GridView.builder(
+              gridDelegate:
+              SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                childAspectRatio: 10,
+              ),
+              padding:
+              const EdgeInsets.all(8),
+              itemCount:
+              searchResultHighSchools
+                  .length,
+              itemBuilder:
+                  (BuildContext context,
+                  int index) {
+                return SizedBox(
+                  height: 10,
+                  width: 10,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        highSchoolController.text =
+                        searchResultHighSchools[
+                            index];
+                       areaController.text= highschool_map[searchResultHighSchools[
+                        index]]['所在位置'];
+                        searchResultHighSchools =
+                            [];
 
-            }, child: Text(aa)),
-             Text(
-              aa,
+                      });
+                    },
+                    child: Container(
+                      child: Center(
+                          child: Row(
+                            children: [
+
+                              Text(
+                                  searchResultHighSchools[
+                                  index]),
+                            ],
+                          )),
+                    ),
+                  ),
+                );
+              },
             ),
-            Text(
-              aa.toString(),
+          )
+              : SizedBox(),
+          TextFormField(
+            decoration: InputDecoration(
+              labelText: '地域名',
             ),
-            Text(
-              result.toString(),
-              style: Theme.of(context).textTheme.headline4,
+            controller: areaController,
+            onChanged: (text) {
+
+            },
+
+          ),
+
+          TextFormField(
+            decoration: InputDecoration(
+              labelText: '大学名',
             ),
-          ],
-        ),
+            controller: universityController,
+            onChanged: (text) {
+              List resultUniversityKana =
+              universities_kana_list
+                  .where((univ) =>
+                  univ.contains(text))
+                  .toList();
+              //ひらがなのリストが手に入る
+
+              List resultUniversityKanji =
+              universities_kanji_list
+                  .where((univ) =>
+                  univ.contains(text))
+                  .toList();
+              //漢字のリストが手に入る
+
+              //ひらがな対応
+              if (resultUniversityKana
+                  .isNotEmpty) {
+                List resultIndex = [];
+                for (var i
+                in resultUniversityKana) {
+                  resultIndex.add(
+                      universities_kana_list
+                          .indexOf(i));
+                }
+                List result = [];
+                for (var i in resultIndex) {
+                  result.add(universities_kanji_list[i]);
+                }
+                if (result.isNotEmpty) {
+                  setState(() {
+                    searchResultUniversities =
+                        result;
+                  });
+                }
+              }
+              //漢字対応
+              else if (resultUniversityKanji
+                  .isNotEmpty) {
+                List result = [];
+                for (var i
+                in resultUniversityKanji) {
+                  result.add(i);
+                }
+                if (result.isNotEmpty) {
+                  setState(() {
+                    searchResultUniversities =
+                        result;
+                  });
+                }
+              }
+              print(searchResultUniversities);
+            },
+          ),
+          SizedBox(height: 8),
+          (searchResultUniversities.isNotEmpty)
+              ? Container(
+            color: Colors.grey.shade200,
+            height: 200,
+            child: GridView.builder(
+              gridDelegate:
+              SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                childAspectRatio: 10,
+              ),
+              padding:
+              const EdgeInsets.all(8),
+              itemCount:
+              searchResultUniversities
+                  .length,
+              itemBuilder:
+                  (BuildContext context,
+                  int index) {
+                return SizedBox(
+                  height: 10,
+                  width: 10,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        universityController.text =
+                        searchResultUniversities[
+                        index];
+
+                        searchResultUniversities =
+                        [];
+
+                      });
+                    },
+                    child: Container(
+                      child: Center(
+                          child: Row(
+                            children: [
+
+                              Text(
+                                  searchResultUniversities[
+                                  index]),
+                            ],
+                          )),
+                    ),
+                  ),
+                );
+              },
+            ),
+          )
+              : SizedBox(),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: (){
-          //音声入力開始
-          vr_function();
-
-          timerd = Timer.periodic(
-              const Duration(milliseconds: 100), (_) {
-            setState(() {
-              result = createList();
-              print('remaintext' +
-                  'result1' +
-                  result[1] +
-                  'result0' +
-                  result[0]);
-            });
-          });
-        },
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
